@@ -750,12 +750,16 @@
 
             // إذا اللاعب موجود مسبقاً في الغرفة، احتفظ بلونه
             if (room.players[deviceId]) {
-                playerColor = room.players[deviceId].color;
-            } else {
-                // تحديد اللون للعضو الجديد
-                const existingColors = Object.values(room.players).map(p => p.color);
-                playerColor = existingColors.includes('white') ? 'black' : 'white';
-            }
+    playerColor = room.players[deviceId].color; // لاعب موجود مسبقًا
+} else {
+    const existingColors = Object.values(room.players).map(p => p.color);
+    if (!existingColors.includes('white')) playerColor = 'white';
+    else if (!existingColors.includes('black')) playerColor = 'black';
+    else {
+        alert('❌ الغرفة ممتلئة!');
+        return;
+    }
+}
 
             gameState.board = room.board;
             gameState.currentTurn = room.currentTurn;
@@ -1181,3 +1185,4 @@
 
 </body>
 </html>
+
