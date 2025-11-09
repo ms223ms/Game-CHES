@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لعبة الشطرنج أونلاين</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <!-- تحميل CSS من CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" integrity="sha512-Km0RRYr2TzvS7gNxTi1Z5QzyZXi8nsDcKNlF9ecq1xMzp0wN0o9Hk+X+6S0X6wA+TYWpkApk3zZ0Lgi10x9Jxg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             font-family: 'Almarai', sans-serif;
@@ -17,22 +17,15 @@
             min-height: 100vh;
             padding: 20px;
         }
-
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        #loginBox,
-        #gameBox {
+        h1 { color: #333; margin-bottom: 10px; }
+        #loginBox, #gameBox {
             background: #fff;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             margin-bottom: 20px;
             text-align: center;
         }
-
         input {
             padding: 8px 12px;
             font-size: 16px;
@@ -40,7 +33,6 @@
             border: 1px solid #ccc;
             margin-bottom: 10px;
         }
-
         button {
             padding: 10px 18px;
             font-size: 16px;
@@ -50,23 +42,11 @@
             border-radius: 8px;
             cursor: pointer;
         }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        #message {
-            margin-top: 15px;
-            color: red;
-            font-weight: bold;
-        }
-
-        #board {
-            margin-top: 20px;
-        }
+        button:hover { background-color: #45a049; }
+        #message { margin-top: 15px; color: red; font-weight: bold; }
+        #board { margin-top: 20px; width: 400px; }
     </style>
 </head>
-
 <body>
     <h1>لعبة الشطرنج أونلاين</h1>
 
@@ -82,12 +62,14 @@
         <h2 id="welcome"></h2>
         <div id="gamesLeft"></div>
         <div id="message"></div>
-        <div id="board" style="width: 400px;"></div>
+        <div id="board"></div>
         <button id="restartBtn" style="margin-top:15px;" onclick="restartGame()">إعادة اللعبة</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <!-- تحميل JS من CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js" integrity="sha512-hPNZpJwzOKnVdfVklrRMFC4yxXZxWy/ggx6Plv2xOFdMKxV8Yjh3k6YFFIcgfY3Z7r0VxMFrALjFS+HfRLk1Lw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js" integrity="sha512-Txgpr3NJG8ey0U1A/62pN5llq3w8Qj9xWTkKZtn+ZsJ6hM9X83oXYGm9v9q7X11TQy1mGpLhL4n5f3b1jIoaNw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script>
         const BIN_ID = "6910992143b1c97be9a29d04";
         const ACCESS_KEY = "$2a$10$qkmZsmELHd130a6vd1EGAuH/xuysqQUS9oAmaLl58wzSfyj2SAdHu";
@@ -145,9 +127,9 @@
             if (!currentUser.subscriptionActive) {
                 let left = 4 - currentUser.gamesPlayed;
                 if (left <= 0) {
-                    document.getElementById('message').innerHTML =
+                    document.getElementById('message').innerHTML = 
                         `لقد انتهت الألعاب المجانية. للاستمرار، يرجى دفع 100 جنيه على الرقم <b>01120194940</b> عبر إنستاباي.`;
-                    board.destroy();
+                    if(board) board.destroy();
                     return;
                 }
                 document.getElementById('gamesLeft').innerText = `عدد الألعاب المتبقية: ${left}`;
@@ -164,7 +146,7 @@
             });
         }
 
-        function onDrop(source, target, piece, newPos, oldPos, orientation) {
+        function onDrop(source, target) {
             let move = game.move({ from: source, to: target, promotion: 'q' });
             if (move === null) return 'snapback';
         }
@@ -182,5 +164,4 @@
         }
     </script>
 </body>
-
 </html>
