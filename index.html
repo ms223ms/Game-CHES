@@ -517,42 +517,31 @@
             await loadData();
 
             if (!gameData.rooms[roomId]) {
-    // إنشاء غرفة جديدة
-    initializeBoard();
-    gameData.rooms[roomId] = {
-        board: gameState.board,
-        currentTurn: 'white',
-        players: {},
-        createdAt: Date.now()
-    };
-    playerColor = 'white';
-} else {
-    const room = gameData.rooms[roomId];
-
-    if (!room.players) room.players = {}; // تأكد من وجود players
-
-    const count = Object.keys(room.players).length;
-
-    if (count >= 2 && !room.players[deviceId]) {
-        alert('❌ الغرفة ممتلئة!');
-        hideLoading();
-        return;
-    }
-
-    // تحديد اللون بشكل صحيح
-    if (count === 0) {
-        playerColor = 'white';
-    } else if (count === 1) {
-        const existingPlayerColor = Object.values(room.players)[0].color;
-        playerColor = existingPlayerColor === 'white' ? 'black' : 'white';
-    } else {
-        // لن يصل هنا لأن count >=2 تم التعامل معه أعلاه
-        playerColor = null;
-    }
-
-    gameState.board = room.board;
-    gameState.currentTurn = room.currentTurn;
-
+                initializeBoard();
+                gameData.rooms[roomId] = {
+                    board: gameState.board,
+                    currentTurn: 'white',
+                    players: {},
+                    createdAt: Date.now()
+                };
+                playerColor = 'white';
+            } else {
+                const room = gameData.rooms[roomId];
+                const count = Object.keys(room.players).length;
+                
+                if (count >= 2 && !room.players[deviceId]) {
+                    alert('❌ الغرفة ممتلئة!');
+                    hideLoading();
+                    return;
+                }
+                
+                playerColor = room.players[deviceId] ? 
+                    room.players[deviceId].color : 
+                    (Object.values(room.players)[0].color === 'white' ? 'black' : 'white');
+                
+                gameState.board = room.board;
+                gameState.currentTurn = room.currentTurn;
+            }
 
             gameData.rooms[roomId].players[deviceId] = {
                 email: currentUser.email,
