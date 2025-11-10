@@ -430,24 +430,60 @@ function isCheckmate(color){
     return isKingInCheck(color);
 }
 
-function handleSquareClick(r,c){
-    if(gameState.currentTurn!==playerColor){ alert('⏳ انتظر دورك!'); return; }
-    const piece=gameState.board[r][c];
-    if(gameState.selectedPiece){
-        const [fr,fc]=gameState.selectedPiece;
-        const mp=gameState.board[fr][fc];
-        if(!isValidMove(fr,fc,r,c,mp)){ gameState.selectedPiece=null; renderBoard(); return; }
-        if(isKingInCheck(playerColor)){ if(!canPieceSaveKing(fr,fc,r,c)){ alert("⚠️ يجب تحريك قطعة لتحمي الملك!"); gameState.selectedPiece=null; renderBoard(); return; } }
-        gameState.board[r][c]=mp; gameState.board[fr][fc]='';
-        gameState.lastMove={from:[fr,fc],to:[r,c]};
-        gameState.currentTurn=gameState.currentTurn==='white'?'black':'white';
-        gameState.selectedPiece=null; saveMove(); renderBoard();
-        const opponentColor=gameState.currentTurn;
-        if(isKingInCheck(opponentColor)){ alert(`⚠️ ${opponentColor.toUpperCase()} في وضع Check!`); if(isCheckmate(opponentColor)){ alert(`🏆 ${opponentColor.toUpperCase()} انتهت اللعبة، الملك مات!`); } }
-    }else if(piece && isPieceColor(piece,playerColor)){
-        if(!isKingInCheck(playerColor) || canPieceMove(r,c)){ gameState.selectedPiece=[r,c]; renderBoard(); }
+function handleSquareClick(r, c) {
+    if (gameState.currentTurn !== playerColor) {
+        alert('⏳ انتظر دورك!');
+        return;
+    }
+
+    const piece = gameState.board[r][c];
+
+    if (gameState.selectedPiece) {
+        const [fr, fc] = gameState.selectedPiece;
+        const mp = gameState.board[fr][fc];
+
+        // التحقق من صحة الحركة
+        if (!isValidMove(fr, fc, r, c, mp)) {
+            gameState.selectedPiece = null;
+            renderBoard();
+            return;
+        }
+
+        // التحقق إذا الحركة تعرض الملك للخطر
+        if (!canPieceSaveKing(fr, fc, r, c)) {
+            alert("❌ Invalid move! King would be in check.");
+            gameState.selectedPiece = null;
+            renderBoard();
+            return;
+        }
+
+        // تنفيذ الحركة
+        gameState.board[r][c] = mp;
+        gameState.board[fr][fc] = '';
+        gameState.lastMove = { from: [fr, fc], to: [r, c] };
+        gameState.currentTurn = gameState.currentTurn === 'white' ? 'black' : 'white';
+        gameState.selectedPiece = null;
+        saveMove();
+        renderBoard();
+
+        // التحقق من وضع الملك بعد الحركة
+        const opponentColor = gameState.currentTurn;
+        if (isKingInCheck(opponentColor)) {
+            if (isCheckmate(opponentColor)) {
+                alert(`🏆 Checkmate! ${opponentColor.toUpperCase()} King is dead!`);
+            } else {
+                alert(`⚠️ Check! ${opponentColor.toUpperCase()} King is under attack!`);
+            }
+        }
+    } else if (piece && isPieceColor(piece, playerColor)) {
+        // تحديد القطعة
+        if (!isKingInCheck(playerColor) || canPieceMove(r, c)) {
+            gameState.selectedPiece = [r, c];
+            renderBoard();
+        }
     }
 }
+
 
 function saveMove(){
     if(currentRoom){ gameData.rooms[currentRoom].board=gameState.board; gameData.rooms[currentRoom].currentTurn=gameState.currentTurn; saveData(); }
@@ -497,5 +533,6 @@ initializeBoard();
 </script>
 </body>
 </html>
+
 
 
