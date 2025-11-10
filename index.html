@@ -1,438 +1,170 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة الشطرنج - اشتراك شهري</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #1a1a1a;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 800px;
-            width: 95%;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 2rem;
-        }
-        .status-bar {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        .status-bar.warning { background: #fff3cd; border: 2px solid #ffc107; }
-        .status-bar.success { background: #d4edda; border: 2px solid #28a745; }
-        #chessboard {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 2px;
-            perspective: 800px;
-            transform-style: preserve-3d;
-            width: 90vw;
-            max-width: 480px;
-            aspect-ratio: 1 / 1;
-            margin: 0 auto 10px auto;
-        }
-        .square {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: calc(8vw);
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 10px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.5);
-            transform-style: preserve-3d;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .square.light { background: #f0d9b5; }
-        .square.dark { background: #b58863; }
-        .square.selected { box-shadow: inset 0 0 12px #ff0; }
-        .square.last-move { background: #cdd26a !important; }
-        .square:hover { transform: translateZ(25px) rotateX(15deg); }
-        input[type="text"], input[type="email"] {
-            width: 100%; padding: 10px; margin: 8px 0;
-            border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;
-        }
-        button {
-            background: #007bff; color: white; border: none;
-            padding: 12px; border-radius: 8px; font-size: 1rem;
-            cursor: pointer; transition: all 0.3s; width: 100%; margin: 5px 0;
-        }
-        button:hover { background: #0056b3; transform: translateY(-2px); }
-        .btn-danger { background: #dc3545; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-success { background: #28a745; }
-        .btn-success:hover { background: #218838; }
-        .games-remaining { font-size: 1.2rem; color: #28a745; margin: 5px 0; }
-        .hidden { display: none; }
-        .device-id { font-size: 0.8rem; color: #666; word-break: break-all; margin: 5px 0; padding: 5px; background: #f8f9fa; border-radius: 5px; }
-        .room-info { background: #e3f2fd; padding: 10px; border-radius: 8px; margin: 10px 0; text-align: center; }
-        .room-code { font-size: 1.3rem; font-weight: bold; color: #1976d2; margin: 5px 0; }
-        #playersPanel { display: flex; justify-content: space-between; width: 90vw; max-width: 480px; margin-bottom: 10px; perspective: 800px; }
-        .player { padding: 5px 10px; border-radius: 6px; background: #222; color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transform: rotateX(10deg); text-align: center; min-width: 80px; }
-        .players-list { display: flex; justify-content: space-around; margin: 10px 0; }
-        .player-box { padding: 8px 15px; border-radius: 8px; background: white; border: 2px solid #ddd; }
-        .player-box.active { border-color: #28a745; background: #d4edda; }
-        .subscription-panel { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 10px; }
-        .payment-info { background: white; padding: 10px; border-radius: 8px; margin: 10px 0; border: 2px dashed #007bff; }
-        .loading { text-align: center; padding: 15px; color: #666; font-size: 1.1rem; }
-        #gameArea { display: flex; flex-direction: column; align-items: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لعبة الشطرنج - اشتراك شهري</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Arial,sans-serif;background:#1a1a1a;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+.container{background:white;border-radius:20px;padding:20px;max-width:900px;width:95%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+h1{text-align:center;color:#333;margin-bottom:15px;font-size:2rem;}
+.status-bar{background:#f8f9fa;padding:10px;border-radius:10px;margin-bottom:15px;text-align:center;}
+.status-bar.warning{background:#fff3cd;border:2px solid #ffc107;}
+.status-bar.success{background:#d4edda;border:2px solid #28a745;}
+#chessboard{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:90vw;max-width:480px;aspect-ratio:1/1;margin:0 auto 10px auto;}
+.square{display:flex;justify-content:center;align-items:center;font-size:calc(10vw/8);font-weight:bold;cursor:pointer;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.4);transition:all 0.2s;}
+.square.light{background:#f0d9b5;}
+.square.dark{background:#b58863;}
+.square.selected{box-shadow:0 0 15px 3px #ff0 inset;}
+.square.last-move{background:#cdd26a !important;}
+.square:hover{transform:translateZ(20px);}
+button{padding:10px 15px;margin:5px;border:none;border-radius:6px;background:#007bff;color:white;cursor:pointer;}
+button:hover{background:#0056b3;}
+.btn-danger{background:#dc3545;}
+.btn-danger:hover{background:#c82333;}
+.btn-success{background:#28a745;}
+.btn-success:hover{background:#218838;}
+.games-remaining{font-size:1.2rem;color:#28a745;margin:5px 0;}
+.hidden{display:none;}
+.device-id{font-size:0.8rem;color:#666;word-break:break-all;margin:5px 0;padding:5px;background:#f8f9fa;border-radius:5px;}
+.room-info{background:#e3f2fd;padding:10px;border-radius:8px;margin:10px 0;text-align:center;}
+.room-code{font-size:1.3rem;font-weight:bold;color:#1976d2;margin:5px 0;}
+#playersPanel{display:flex;justify-content:space-between;width:90vw;max-width:480px;margin-bottom:10px;}
+.player{padding:5px 10px;border-radius:6px;background:#222;color:#fff;box-shadow:0 4px 8px rgba(0,0,0,0.5);text-align:center;min-width:80px;}
+.players-list{display:flex;justify-content:space-around;margin:10px 0;}
+.player-box{padding:8px 15px;border-radius:8px;background:white;border:2px solid #ddd;}
+.player-box.active{border-color:#28a745;background:#d4edda;}
+.subscription-panel{background:#f8f9fa;padding:15px;border-radius:10px;margin-top:10px;}
+.payment-info{background:white;padding:10px;border-radius:8px;margin:10px 0;border:2px dashed #007bff;}
+.loading{text-align:center;padding:15px;color:#666;font-size:1.1rem;}
+#gameArea{display:flex;flex-direction:column;align-items:center;}
+input[type=text],input[type=email]{width:100%;padding:10px;margin:8px 0;border:2px solid #ddd;border-radius:8px;font-size:1rem;}
+</style>
 </head>
 <body>
 <div class="container">
-    <h1>♔ لعبة الشطرنج الاحترافية ♚</h1>
-    <div id="loadingDiv" class="loading hidden">⏳ جاري التحميل...</div>
+<h1>♔ لعبة الشطرنج الاحترافية ♚</h1>
+<div id="loadingDiv" class="loading hidden">⏳ جاري التحميل...</div>
 
-    <!-- Login Panel -->
-    <div id="loginPanel">
-        <div class="status-bar">
-            <h3>تسجيل الدخول</h3>
-            <p>أدخل بريدك الإلكتروني للبدء</p>
-        </div>
-        <input type="email" id="emailInput" placeholder="البريد الإلكتروني" required>
-        <button id="loginBtn">دخول</button>
-        <div class="device-id" id="deviceIdLogin"></div>
-    </div>
+<!-- Login -->
+<div id="loginPanel">
+<div class="status-bar"><h3>تسجيل الدخول</h3><p>أدخل بريدك الإلكتروني للبدء</p></div>
+<input type="email" id="emailInput" placeholder="البريد الإلكتروني" required>
+<button id="loginBtn">دخول</button>
+<div class="device-id" id="deviceIdLogin"></div>
+</div>
 
-    <!-- Game Panel -->
-    <div id="gamePanel" class="hidden">
-        <div id="statusBar" class="status-bar">
-            <div class="games-remaining">الألعاب المتبقية: <span id="gamesLeft">4</span></div>
-            <div id="userEmail"></div>
-            <div class="device-id" id="deviceIdGame"></div>
-        </div>
+<!-- Game Panel -->
+<div id="gamePanel" class="hidden">
+<div id="statusBar" class="status-bar">
+<div class="games-remaining">الألعاب المتبقية: <span id="gamesLeft">4</span></div>
+<div id="userEmail"></div>
+<div class="device-id" id="deviceIdGame"></div>
+</div>
 
-        <!-- Room Selection -->
-        <div id="roomSelection">
-            <input type="text" id="roomInput" placeholder="أدخل رقم الغرفة أو اتركه فارغاً لإنشاء غرفة" maxlength="6">
-            <button id="joinBtn">انضمام / إنشاء غرفة</button>
-        </div>
+<div id="roomSelection">
+<input type="text" id="roomInput" placeholder="أدخل رقم الغرفة أو اتركه فارغاً لإنشاء غرفة" maxlength="6">
+<button id="joinBtn">انضمام / إنشاء غرفة</button>
+</div>
 
-        <!-- Game Area -->
-        <div id="gameArea" class="hidden">
-            <div class="room-info">
-                <div>رقم الغرفة:</div>
-                <div class="room-code" id="roomCode"></div>
-                <div style="font-size: 0.8rem; color: #666;">شارك هذا الرقم للعب مع صديقك</div>
-            </div>
+<div id="gameArea" class="hidden">
+<div class="room-info">
+<div>رقم الغرفة:</div>
+<div class="room-code" id="roomCode"></div>
+<div style="font-size:0.8rem;color:#666;">شارك هذا الرقم للعب مع صديقك</div>
+</div>
 
-            <div class="players-list">
-                <div class="player-box" id="whitePlayer">
-                    <div>⚪ أبيض</div>
-                    <div id="whiteEmail">انتظار...</div>
-                </div>
-                <div class="player-box" id="blackPlayer">
-                    <div>⚫ أسود</div>
-                    <div id="blackEmail">انتظار...</div>
-                </div>
-            </div>
+<div class="players-list">
+<div class="player-box" id="whitePlayer"><div>⚪ أبيض</div><div id="whiteEmail">انتظار...</div></div>
+<div class="player-box" id="blackPlayer"><div>⚫ أسود</div><div id="blackEmail">انتظار...</div></div>
+</div>
 
-            <div id="chessboard"></div>
+<div id="chessboard"></div>
 
-            <button id="resetBtn" class="btn-danger">لعبة جديدة</button>
-            <button id="leaveBtn" class="btn-danger">مغادرة الغرفة</button>
-        </div>
+<button id="resetBtn" class="btn-danger">لعبة جديدة</button>
+<button id="leaveBtn" class="btn-danger">مغادرة الغرفة</button>
+</div>
 
-        <!-- Subscription Panel -->
-        <div id="subscriptionPanel" class="subscription-panel hidden">
-            <h3>⚠️ انتهت ألعابك المجانية!</h3>
-            <p>لقد لعبت 4 ألعاب. للاستمرار، يرجى الاشتراك الشهري.</p>
+<div id="subscriptionPanel" class="subscription-panel hidden">
+<h3>⚠️ انتهت ألعابك المجانية!</h3>
+<p>لقد لعبت 4 ألعاب. للاستمرار، يرجى الاشتراك الشهري.</p>
+<div class="payment-info">
+<h4>💳 معلومات الدفع عبر Instapay:</h4>
+<p><strong>رقم الهاتف:</strong> 01120194940</p>
+<p><strong>المبلغ:</strong> 100 جنيه مصري شهرياً</p>
+<p><strong>ملاحظة:</strong> بعد التحويل، أدخل رقم المعاملة أدناه</p>
+</div>
+<input type="text" id="transactionInput" placeholder="رقم معاملة Instapay">
+<button id="verifyBtn" class="btn-success">تأكيد الدفع</button>
+</div>
 
-            <div class="payment-info">
-                <h4>💳 معلومات الدفع عبر Instapay:</h4>
-                <p><strong>رقم الهاتف:</strong> 01120194940</p>
-                <p><strong>المبلغ:</strong> 100 جنيه مصري شهرياً</p>
-                <p><strong>ملاحظة:</strong> بعد التحويل، أدخل رقم المعاملة أدناه</p>
-            </div>
-
-            <input type="text" id="transactionInput" placeholder="رقم معاملة Instapay">
-            <button id="verifyBtn" class="btn-success">تأكيد الدفع</button>
-        </div>
-
-        <button id="logoutBtn" class="btn-danger">تسجيل الخروج</button>
-    </div>
+<button id="logoutBtn" class="btn-danger">تسجيل الخروج</button>
+</div>
 </div>
 
 <script>
-// ================== إعدادات JSONBin ==================
-const JSONBIN_API_KEY = '$2a$10$MUgieOcdv8QNyPRuRsFb6eaAOYcAzxuWL6TB6FbI8L7fhZIVVibdO';
-const JSONBIN_BIN_ID = '6911aa09ae596e708f4fdd18';
-const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+// ===== متغيرات و JSONBin =====
+const JSONBIN_API_KEY='$2a$10$MUgieOcdv8QNyPRuRsFb6eaAOYcAzxuWL6TB6FbI8L7fhZIVVibdO';
+const JSONBIN_BIN_ID='6911aa09ae596e708f4fdd18';
+const JSONBIN_URL=`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+let currentUser=null,deviceId=null,currentRoom=null,playerColor=null;
+let gameData={users:{},rooms:{},paymentVerifications:{}},updateInterval=null;
+let gameState={board:[],currentTurn:'white',selectedPiece:null,lastMove:null};
 
-// ================== متغيرات عامة ==================
-let currentUser=null, deviceId=null, currentRoom=null, playerColor=null;
-let gameData={users:{}, rooms:{}, paymentVerifications:{}}, updateInterval=null;
-let gameState={board:[], currentTurn:'white', selectedPiece:null, lastMove:null};
-
-// ================== Device Fingerprint ==================
+// ===== Device ID =====
 function generateDeviceFingerprint(){
     try{
-        const canvas=document.createElement('canvas');
-        const ctx=canvas.getContext('2d');
-        ctx.font="14px Arial"; ctx.fillStyle="#f60";
-        ctx.fillRect(125,1,62,20);
-        ctx.fillStyle="#069"; ctx.fillText("Chess",2,15);
+        const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+        ctx.font="14px Arial"; ctx.fillStyle="#f60"; ctx.fillRect(125,1,62,20); ctx.fillStyle="#069"; ctx.fillText("Chess",2,15);
         const canvasData=canvas.toDataURL();
-        const fp={ua:navigator.userAgent, lang:navigator.language, platform:navigator.platform,
-            screen:`${screen.width}x${screen.height}`, tz:Intl.DateTimeFormat().resolvedOptions().timeZone,
-            canvas:canvasData.substring(0,50)};
-        let hash=0, str=JSON.stringify(fp);
-        for(let i=0;i<str.length;i++){hash=((hash<<5)-hash)+str.charCodeAt(i); hash=hash&hash;}
+        const fp={ua:navigator.userAgent,lang:navigator.language,platform:navigator.platform,screen:`${screen.width}x${screen.height}`,tz:Intl.DateTimeFormat().resolvedOptions().timeZone,canvas:canvasData.substring(0,50)};
+        let hash=0,str=JSON.stringify(fp);
+        for(let i=0;i<str.length;i++){hash=((hash<<5)-hash)+str.charCodeAt(i);hash=hash&hash;}
         return 'dev_'+Math.abs(hash).toString(36);
     }catch(e){ return 'dev_'+Math.random().toString(36).substr(2,12);}
 }
 
-// ================== UI ==================
+// ===== UI =====
 function showLoading(msg){ const div=document.getElementById('loadingDiv'); div.textContent=msg||'⏳ جاري التحميل...'; div.classList.remove('hidden'); }
 function hideLoading(){ document.getElementById('loadingDiv').classList.add('hidden'); }
 
-// ================== JSONBin API ==================
-async function loadData(){ 
-    try{
-        const res=await fetch(JSONBIN_URL+'/latest',{headers:{'X-Master-Key':JSONBIN_API_KEY}});
-        if(!res.ok) throw new Error('فشل التحميل');
-        const data=await res.json(); gameData=data.record||{users:{},rooms:{},paymentVerifications:{}};
-        return gameData;
-    }catch(e){ console.error('خطأ:',e); return {users:{},rooms:{},paymentVerifications:{}}; }
-}
-async function saveData(){
-    try{
-        const response=await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`,{method:"PUT",
-        headers:{"Content-Type":"application/json","X-Master-Key":JSONBIN_API_KEY},body:JSON.stringify(gameData)});
-        if(!response.ok){ console.error("❌ خطأ أثناء الحفظ:",response.status,response.statusText); alert("⚠️ لم يتم حفظ البيانات"); }
-    }catch(error){ console.error("❌ فشل الاتصال:",error); alert("🚨 فشل الاتصال بالسيرفر"); }
-}
+// ===== JSONBin =====
+async function loadData(){ try{ const res=await fetch(JSONBIN_URL+'/latest',{headers:{'X-Master-Key':JSONBIN_API_KEY}}); if(!res.ok) throw new Error('فشل التحميل'); const data=await res.json(); gameData=data.record||{users:{},rooms:{},paymentVerifications:{}}; return gameData;}catch(e){console.error(e); return {users:{},rooms:{},paymentVerifications:{}};} }
+async function saveData(){ try{ await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JSONBIN_API_KEY},body:JSON.stringify(gameData)});}catch(e){console.error(e);}}
 
-// ================== Authentication ==================
+// ===== Login =====
 async function login(){
     const email=document.getElementById('emailInput').value.trim();
-    if(!email || !email.includes('@')){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
+    if(!email.includes('@')){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
     showLoading('جاري تسجيل الدخول...'); await loadData();
-    if(gameData.users[deviceId]){
-        const userData=gameData.users[deviceId];
-        if(userData.email!==email){ alert(`❌ هذا الجهاز مسجل بـ: ${userData.email}`); hideLoading(); return; }
-        currentUser=userData;
-    }else{
-        currentUser={email, deviceId, gamesPlayed:0, subscribed:false, subscriptionDate:null, createdAt:Date.now()};
-        gameData.users[deviceId]=currentUser; await saveData();
-    }
+    if(gameData.users[deviceId]){ const userData=gameData.users[deviceId]; if(userData.email!==email){ alert(`❌ هذا الجهاز مسجل بـ: ${userData.email}`); hideLoading(); return; } currentUser=userData; } 
+    else{ currentUser={email,deviceId,gamesPlayed:0,subscribed:false,subscriptionDate:null,createdAt:Date.now()}; gameData.users[deviceId]=currentUser; await saveData(); }
     checkSubscription(); showGamePanel(); hideLoading();
 }
-function showGamePanel(){
-    document.getElementById('loginPanel').classList.add('hidden');
-    document.getElementById('gamePanel').classList.remove('hidden');
-    document.getElementById('userEmail').textContent='المستخدم: '+currentUser.email;
-    document.getElementById('deviceIdGame').textContent='معرف الجهاز: '+deviceId;
-    updateGamesDisplay();
-}
+function showGamePanel(){ document.getElementById('loginPanel').classList.add('hidden'); document.getElementById('gamePanel').classList.remove('hidden'); document.getElementById('userEmail').textContent='المستخدم: '+currentUser.email; document.getElementById('deviceIdGame').textContent='معرف الجهاز: '+deviceId; updateGamesDisplay();}
 function logout(){ if(currentRoom) leaveRoom(); currentUser=null; currentRoom=null; document.getElementById('loginPanel').classList.remove('hidden'); document.getElementById('gamePanel').classList.add('hidden'); }
 
-// ================== Subscription ==================
-function checkSubscription(){
-    if(currentUser.subscribed && currentUser.subscriptionDate){
-        const now=Date.now(), oneMonth=30*24*60*60*1000;
-        if(now-currentUser.subscriptionDate>oneMonth){ currentUser.subscribed=false; gameData.users[deviceId].subscribed=false; saveData(); }
-    }
-    if(!currentUser.subscribed && currentUser.gamesPlayed>=4){ showSubscriptionPanel(); }
-}
+// ===== Subscription =====
+function checkSubscription(){ if(currentUser.subscribed && currentUser.subscriptionDate){ const now=Date.now(),oneMonth=30*24*60*60*1000; if(now-currentUser.subscriptionDate>oneMonth){ currentUser.subscribed=false; gameData.users[deviceId].subscribed=false; saveData(); } } if(!currentUser.subscribed && currentUser.gamesPlayed>=4){ showSubscriptionPanel(); } }
 function showSubscriptionPanel(){ document.getElementById('subscriptionPanel').classList.remove('hidden'); document.getElementById('gameArea').classList.add('hidden'); document.getElementById('roomSelection').classList.add('hidden'); }
-async function verifyPayment(){
-    const txn=document.getElementById('transactionInput').value.trim();
-    if(!txn){ alert('يرجى إدخال رقم المعاملة'); return; }
-    gameData.paymentVerifications[deviceId]={deviceId,email:currentUser.email,transaction:txn,timestamp:Date.now(),status:'pending'};
-    await saveData();
-    alert('✅ تم الإرسال!\nسيتم المراجعة خلال 24 ساعة.'); document.getElementById('transactionInput').value='';
-}
-function updateGamesDisplay(){
-    const left=currentUser.subscribed?'∞':Math.max(0,4-currentUser.gamesPlayed);
-    document.getElementById('gamesLeft').textContent=left;
-    const bar=document.getElementById('statusBar');
-    if(currentUser.subscribed){ bar.classList.add('success'); bar.classList.remove('warning'); }
-    else if(currentUser.gamesPlayed>=3){ bar.classList.add('warning'); }
-}
+async function verifyPayment(){ const txn=document.getElementById('transactionInput').value.trim(); if(!txn){ alert('يرجى إدخال رقم المعاملة'); return; } gameData.paymentVerifications[deviceId]={deviceId,email:currentUser.email,transaction:txn,timestamp:Date.now(),status:'pending'}; await saveData(); alert('✅ تم الإرسال!'); document.getElementById('transactionInput').value=''; }
+function updateGamesDisplay(){ const left=currentUser.subscribed?'∞':Math.max(0,4-currentUser.gamesPlayed); document.getElementById('gamesLeft').textContent=left; const bar=document.getElementById('statusBar'); if(currentUser.subscribed){ bar.classList.add('success'); bar.classList.remove('warning'); } else if(currentUser.gamesPlayed>=3){ bar.classList.add('warning'); } }
 
-// ================== Rooms ==================
-async function joinRoom(){
-    if(!currentUser.subscribed && currentUser.gamesPlayed>=4){ showSubscriptionPanel(); return; }
-    let roomId=document.getElementById('roomInput').value.trim().toUpperCase();
-    if(!roomId) roomId=Math.random().toString(36).substr(2,6).toUpperCase();
-    showLoading('جاري الانضمام...'); await loadData();
-    if(!gameData.rooms[roomId]){ initializeBoard(); gameData.rooms[roomId]={board:gameState.board,currentTurn:'white',players:{},createdAt:Date.now()}; playerColor='white'; }
-    else{
-        const room=gameData.rooms[roomId];
-        if(!room.players) room.players={};
-        if(room.players[deviceId]) playerColor=room.players[deviceId].color;
-        else{ const colorsInUse=Object.values(room.players).map(p=>p.color); playerColor=!colorsInUse.includes('white')?'white':(!colorsInUse.includes('black')?'black':null); if(!playerColor){ alert('❌ الغرفة ممتلئة!'); hideLoading(); return; } }
-        gameState.board=room.board; gameState.currentTurn=room.currentTurn;
-    }
-    gameData.rooms[roomId].players[deviceId]={email:currentUser.email,color:playerColor,joinedAt:Date.now(),lastSeen:Date.now()};
-    await saveData();
-    currentRoom=roomId;
-    document.getElementById('roomSelection').classList.add('hidden'); document.getElementById('gameArea').classList.remove('hidden'); document.getElementById('roomCode').textContent=roomId;
-    renderBoard(); updatePlayersList(); hideLoading(); startAutoUpdate();
-}
+// ===== Rooms & Auto Update =====
+async function joinRoom(){ if(!currentUser.subscribed && currentUser.gamesPlayed>=4){ showSubscriptionPanel(); return; } let roomId=document.getElementById('roomInput').value.trim().toUpperCase(); if(!roomId) roomId=Math.random().toString(36).substr(2,6).toUpperCase(); showLoading('جاري الانضمام...'); await loadData(); if(!gameData.rooms[roomId]){ initializeBoard(); gameData.rooms[roomId]={board:gameState.board,currentTurn:'white',players:{},createdAt:Date.now()}; playerColor='white'; } else{ const room=gameData.rooms[roomId]; if(!room.players) room.players={}; if(room.players[deviceId]) playerColor=room.players[deviceId].color; else{ const colorsInUse=Object.values(room.players).map(p=>p.color); playerColor=!colorsInUse.includes('white')?'white':(!colorsInUse.includes('black')?'black':null); if(!playerColor){ alert('❌ الغرفة ممتلئة!'); hideLoading(); return; } } gameState.board=room.board; gameState.currentTurn=room.currentTurn; } gameData.rooms[roomId].players[deviceId]={email:currentUser.email,color:playerColor,joinedAt:Date.now(),lastSeen:Date.now()}; await saveData(); currentRoom=roomId; document.getElementById('roomSelection').classList.add('hidden'); document.getElementById('gameArea').classList.remove('hidden'); document.getElementById('roomCode').textContent=roomId; renderBoard(); updatePlayersList(); hideLoading(); startAutoUpdate(); }
 async function leaveRoom(){ if(currentRoom){ stopAutoUpdate(); await loadData(); if(gameData.rooms[currentRoom]){ delete gameData.rooms[currentRoom].players[deviceId]; if(Object.keys(gameData.rooms[currentRoom].players).length===0) delete gameData.rooms[currentRoom]; await saveData(); } currentRoom=null; playerColor=null; document.getElementById('gameArea').classList.add('hidden'); document.getElementById('roomSelection').classList.remove('hidden'); } }
 function startAutoUpdate(){ stopAutoUpdate(); updateInterval=setInterval(async()=>{ if(currentRoom){ await loadData(); if(gameData.rooms[currentRoom]){ const room=gameData.rooms[currentRoom]; gameState.board=room.board; gameState.currentTurn=room.currentTurn; renderBoard(); updatePlayersList(); } } },3000);}
-function stopAutoUpdate(){ if(updateInterval) clearInterval(updateInterval); }
-function updatePlayersList(){
-    if(!currentRoom || !gameData.rooms[currentRoom]) return;
-    const room=gameData.rooms[currentRoom];
-    const white=document.getElementById('whiteEmail'), black=document.getElementById('blackEmail');
-    white.textContent='انتظار...'; black.textContent='انتظار...';
-    Object.values(room.players).forEach(p=>{ if(p.color==='white') white.textContent=p.email; else if(p.color==='black') black.textContent=p.email; });
-}
+function stopAutoUpdate(){ if(updateInterval) clearInterval(updateInterval);}
+function updatePlayersList(){ if(!currentRoom || !gameData.rooms[currentRoom]) return; const room=gameData.rooms[currentRoom]; const white=document.getElementById('whiteEmail'), black=document.getElementById('blackEmail'); white.textContent='انتظار...'; black.textContent='انتظار...'; Object.values(room.players).forEach(p=>{ if(p.color==='white') white.textContent=p.email; else if(p.color==='black') black.textContent=p.email; }); }
 
-// ================== Chess ==================
-function initializeBoard(){
-    gameState.board=[
-        ['r','n','b','q','k','b','n','r'],
-        ['p','p','p','p','p','p','p','p'],
-        ['','','','','','','',''],
-        ['','','','','','','',''],
-        ['','','','','','','',''],
-        ['','','','','','','',''],
-        ['P','P','P','P','P','P','P','P'],
-        ['R','N','B','Q','K','B','N','R']
-    ];
-    gameState.currentTurn='white';
-    gameState.selectedPiece=null;
-    gameState.lastMove=null;
-}
+// ===== Chess Logic =====
+function initializeBoard(){ gameState.board=[['r','n','b','q','k','b','n','r'],['p','p','p','p','p','p','p','p'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','P','P','P','P','P'],['R','N','B','Q','K','B','N','R']]; gameState.currentTurn='white'; gameState.selectedPiece=null; gameState.lastMove=null; }
+function renderBoard(){ const boardDiv=document.getElementById('chessboard'); boardDiv.innerHTML=''; for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ const square=document.createElement('div'); square.classList.add('square',(r+c)%2===0?'light':'dark'); if(gameState.selectedPiece && gameState.selectedPiece[0]===r && gameState.selectedPiece[1]===c) square.classList.add('selected'); if(gameState.lastMove && ((gameState.lastMove.from[0]===r && gameState.lastMove.from[1]===c) || (gameState.lastMove.to[0]===r && gameState.lastMove.to[1]===c))) square.classList.add('last-move'); square.textContent=pieceToUnicode(gameState.board[r][c]); square.addEventListener('click',()=>handleSquareClick(r,c)); boardDiv.appendChild(square);} } }
+function pieceToUnicode(piece){ switch(piece){case 'K':return '♔';case 'Q':return '♕';case 'R':return '♖';case 'B':return '♗';case 'N':return '♘';case 'P':return '♙';case 'k':return '♚';case 'q':return '♛';case 'r':return '♜';case 'b':return '♝';case 'n':return '♞';case 'p':return '♟';default:return '';}}
+function isPieceColor(piece,color){ if(!piece) return false; if(color==='white') return piece>='A'&&piece<='Z'; return piece>='a'&&piece<='z'; }
 
-// ================== Render ==================
-function renderBoard(){
-    const boardDiv=document.getElementById('chessboard'); boardDiv.innerHTML='';
-    for(let r=0;r<8;r++){
-        for(let c=0;c<8;c++){
-            const square=document.createElement('div');
-            square.classList.add('square',(r+c)%2===0?'light':'dark');
-            if(gameState.selectedPiece && gameState.selectedPiece[0]===r && gameState.selectedPiece[1]===c) square.classList.add('selected');
-            if(gameState.lastMove && ((gameState.lastMove.from[0]===r && gameState.lastMove.from[1]===c) || (gameState.lastMove.to[0]===r && gameState.lastMove.to[1]===c))) square.classList.add('last-move');
-            square.textContent=pieceToUnicode(gameState.board[r][c]);
-            square.addEventListener('click',()=>handleSquareClick(r,c));
-            boardDiv.appendChild(square);
-        }
-    }
-}
-
-function pieceToUnicode(piece){
-    switch(piece){
-        case 'K': return '♔'; case 'Q': return '♕'; case 'R': return '♖'; case 'B': return '♗';
-        case 'N': return '♘'; case 'P': return '♙'; case 'k': return '♚'; case 'q': return '♛';
-        case 'r': return '♜'; case 'b': return '♝'; case 'n': return '♞'; case 'p': return '♟'; default: return '';
-    }
-}
-
-// ================== Chess Logic ==================
-function isPieceColor(piece,color){ if(!piece) return false; if(color==='white') return piece>='A' && piece<='Z'; return piece>='a' && piece<='z'; }
-function isKingInCheck(color){
-    let kingPos=null;
-    for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ if(color==='white' && gameState.board[r][c]==='K') kingPos=[r,c]; else if(color==='black' && gameState.board[r][c]==='k') kingPos=[r,c]; } }
-    if(!kingPos) return false;
-    const [kr,kc]=kingPos;
-    for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ const p=gameState.board[r][c]; if(p && isPieceColor(p,color==='white'?'black':'white')){ if(isValidMove(r,c,kr,kc,p,true)) return true; } } }
-    return false;
-}
-function isKingInCheckAfterMove(color,tempState){
-    const tempBoard=tempState.board;
-    let kingPos=null;
-    for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ if(color==='white' && tempBoard[r][c]==='K') kingPos=[r,c]; else if(color==='black' && tempBoard[r][c]==='k') kingPos=[r,c]; } }
-    if(!kingPos) return false;
-    const [kr,kc]=kingPos;
-    for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ const p=tempBoard[r][c]; if(p && isPieceColor(p,color==='white'?'black':'white')){ if(isValidMove(r,c,kr,kc,p,true)) return true; } } }
-    return false;
-}
-function canPieceSaveKing(fr,fc,tr,tc){
-    const piece=gameState.board[fr][fc];
-    const tempBoard=JSON.parse(JSON.stringify(gameState.board));
-    tempBoard[tr][tc]=piece; tempBoard[fr][fc]='';
-    const tempState={...gameState,board:tempBoard};
-    return !isKingInCheckAfterMove(playerColor,tempState);
-}
-function simulateMove(fr,fc,tr,tc){
-    const tempBoard=JSON.parse(JSON.stringify(gameState.board));
-    tempBoard[tr][tc]=tempBoard[fr][fc]; tempBoard[fr][fc]='';
-    return tempBoard;
-}
-function canPieceMove(fr,fc){
-    for(let tr=0;tr<8;tr++){ for(let tc=0;tc<8;tc++){ if(isValidMove(fr,fc,tr,tc,gameState.board[fr][fc])){ if(!isKingInCheckAfterMove(playerColor,{...gameState,board:simulateMove(fr,fc,tr,tc)})) return true; } } }
-    return false;
-}
-function isCheckmate(color){
-    for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ const p=gameState.board[r][c]; if(p && isPieceColor(p,color)){ if(canPieceMove(r,c)) return false; } } }
-    return isKingInCheck(color);
-}
-
-function handleSquareClick(r,c){
-    if(gameState.currentTurn!==playerColor){ alert('⏳ انتظر دورك!'); return; }
-    const piece=gameState.board[r][c];
-    if(gameState.selectedPiece){
-        const [fr,fc]=gameState.selectedPiece;
-        const mp=gameState.board[fr][fc];
-        if(!isValidMove(fr,fc,r,c,mp)){ gameState.selectedPiece=null; renderBoard(); return; }
-        if(isKingInCheck(playerColor)){ if(!canPieceSaveKing(fr,fc,r,c)){ alert("⚠️ يجب تحريك قطعة لتحمي الملك!"); gameState.selectedPiece=null; renderBoard(); return; } }
-        gameState.board[r][c]=mp; gameState.board[fr][fc]='';
-        gameState.lastMove={from:[fr,fc],to:[r,c]};
-        gameState.currentTurn=gameState.currentTurn==='white'?'black':'white';
-        gameState.selectedPiece=null; saveMove(); renderBoard();
-        const opponentColor=gameState.currentTurn;
-        if(isKingInCheck(opponentColor)){ alert(`⚠️ ${opponentColor.toUpperCase()} في وضع Check!`); if(isCheckmate(opponentColor)){ alert(`🏆 ${opponentColor.toUpperCase()} انتهت اللعبة، الملك مات!`); } }
-    }else if(piece && isPieceColor(piece,playerColor)){
-        if(!isKingInCheck(playerColor) || canPieceMove(r,c)){ gameState.selectedPiece=[r,c]; renderBoard(); }
-    }
-}
-
-function saveMove(){
-    if(currentRoom){ gameData.rooms[currentRoom].board=gameState.board; gameData.rooms[currentRoom].currentTurn=gameState.currentTurn; saveData(); }
-}
-
-// ================== Chess Movement ==================
-function isValidMove(fr,fc,tr,tc,piece,ignoreCheck=false){
-    if(fr===tr && fc===tc) return false;
-    const target=gameState.board[tr][tc];
-    if(target && isPieceColor(target,isPieceColor(piece,'white')?'white':'black')) return false;
-    const dr=tr-fr, dc=tc-fc, adx=Math.abs(dr), ady=Math.abs(dc);
-    switch(piece.toLowerCase()){
-        case 'p': {
-            const dir=(piece==='P')?-1:1;
-            if(dc===0 && !target && dr===dir) return true;
-            if(dc===0 && !target && dr===2*dir && ((piece==='P' && fr===6)||(piece==='p' && fr===1)) && !gameState.board[fr+dir][fc]) return true;
-            if(ady===1 && dr===dir && target && isPieceColor(target,piece==='P'?'black':'white')) return true;
-            return false;
-        }
-        case 'r': return dr===0 || dc===0 ? pathClear(fr,fc,tr,tc):false;
-        case 'n': return (adx===2 && ady===1)||(adx===1 && ady===2);
-        case 'b': return adx===ady ? pathClear(fr,fc,tr,tc):false;
-        case 'q': return (dr===0||dc===0||adx===ady)?pathClear(fr,fc,tr,tc):false;
-        case 'k': return adx<=1 && ady<=1;
-    }
-    return false;
-}
-function pathClear(fr,fc,tr,tc){
-    const dr=Math.sign(tr-fr), dc=Math.sign(tc-fc);
-    let r=fr+dr, c=fc+dc;
-    while(r!==tr || c!==tc){ if(gameState.board[r][c]!=='') return false; r+=dr; c+=dc; }
-    return true;
-}
-
-// ================== Event Listeners ==================
+// ==== Events ====
 document.getElementById('loginBtn').addEventListener('click',login);
 document.getElementById('joinBtn').addEventListener('click',joinRoom);
 document.getElementById('leaveBtn').addEventListener('click',leaveRoom);
@@ -440,7 +172,7 @@ document.getElementById('resetBtn').addEventListener('click',()=>{ if(confirm('�
 document.getElementById('logoutBtn').addEventListener('click',logout);
 document.getElementById('verifyBtn').addEventListener('click',verifyPayment);
 
-// ================== Initialization ==================
+// ==== Initialization ====
 deviceId=generateDeviceFingerprint();
 document.getElementById('deviceIdLogin').textContent='معرف الجهاز: '+deviceId;
 initializeBoard();
