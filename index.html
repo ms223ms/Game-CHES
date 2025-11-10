@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لعبة الشطرنج - اشتراك شهري</title>
     <style>
+        
         * {
             margin: 0;
             padding: 0;
@@ -57,24 +58,22 @@
 
         #chessboard {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 0;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto 20px;
-            border: 3px solid #333;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  grid-template-columns: repeat(8, 60px);
+  grid-template-rows: repeat(8, 60px);
+  transform: rotateX(60deg) rotateZ(-30deg);
+  perspective: 800px;
         }
 
         .square {
-            aspect-ratio: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5rem;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s;
+            width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 32px;
+  background: linear-gradient(145deg, #f0d9b5, #b58863);
+  box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
         }
 
         .square.light {
@@ -95,7 +94,7 @@
         }
 
         .square:hover {
-            opacity: 0.8;
+            transform: translateZ(20px);
         }
 
         input[type="text"], input[type="email"] {
@@ -669,49 +668,124 @@
     }
 
     async function handleSquareClick(r, c) {
-        if (gameState.currentTurn !== playerColor) {
-            alert('⏳ انتظر دورك!');
+    if (gameState.currentTurn !== playerColor) {
+        alert('⏳ انتظر دورك!');
+        return;
+    }
+
+    const piece = gameState.board[r][c];
+
+    if (gameState.selectedPiece) {
+        const [fr, fc] = gameState.selectedPiece;
+        const mp = gameState.board[fr][fc];
+
+        // تحقق من صحة الحركة مع Check
+        if (!isValidMove(fr, fc, r, c, mp)) {
+            gameState.selectedPiece = null;
+            renderBoard();
             return;
         }
 
-        const piece = gameState.board[r][c];
+        // تنفيذ الحركة
+        gameState.board[r][c] = mp;
+        gameState.board[fr][fc] = '';
+        gameState.lastMove = { from: [fr, fc], to: [r, c] };
+        gameState.currentTurn = gameState.currentTurn === 'white' ? 'black' : 'white';
+        gameState.selectedPiece = null;
 
-        if (gameState.selectedPiece) {
-            const [fr, fc] = gameState.selectedPiece;
-            const mp = gameState.board[fr][fc];
+        // حفظ البيانات
+        saveData();
+        renderBoard();
 
-            if (isValidMove(fr, fc, r, c, mp)) {
-                gameState.board[r][c] = mp;
-                gameState.board[fr][fc] = '';
-                gameState.lastMove = { from: [fr, fc], to: [r, c] };
-                gameState.currentTurn = gameState.currentTurn === 'white' ? 'black' : 'white';
-                gameState.selectedPiece = null;
-
-                await loadData();
-                if (gameData.rooms[currentRoom]) {
-                    gameData.rooms[currentRoom].board = gameState.board;
-                    gameData.rooms[currentRoom].currentTurn = gameState.currentTurn;
-                    await saveData();
-                }
-
-                if (!currentUser.subscribed) {
-                    currentUser.gamesPlayed++;
-                    gameData.users[deviceId].gamesPlayed = currentUser.gamesPlayed;
-                    await saveData();
-                    updateGamesDisplay();
-                    checkSubscription();
-                }
-
-                renderBoard();
-            } else {
-                gameState.selectedPiece = null;
-                renderBoard();
+        // فحص Check و Checkmate
+        const opponentColor = gameState.currentTurn;
+        if (isKingInCheck(opponentColor)) {
+            alert(`⚠️ ${opponentColor.toUpperCase()} في وضع Check!`);
+            if (isCheckmate(opponentColor)) {
+                alert(`🏆 ${opponentColor.toUpperCase()} انتهت اللعبة، الملك مات!`);
             }
-        } else if (piece && isPieceColor(piece, playerColor)) {
-            gameState.selectedPiece = [r, c];
-            renderBoard();
+        }
+    } else if (piece && isPieceColor(piece, playerColor)) {
+        // منع اختيار القطعة إذا الملك في Check والحركة لا تحمي الملك
+        if (isKingInCheck(playerColor) && !canPieceSaveKing(fr, fc)) return;
+        gameState.selectedPiece = [r, c];
+        renderBoard();
+    }
+}
+
+      function isKingInCheck(color) {
+    const kingPos = findKing(color);
+    if (!kingPos) return false;
+
+    // افحص إذا أي قطعة معادية تهدد الملك
+    const opponentColor = color === 'white' ? 'black' : 'white';
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const piece = gameState.board[r][c];
+            if (piece && isPieceColor(piece, opponentColor)) {
+                if (isValidMoveWithoutCheck(r, c, kingPos[0], kingPos[1], piece, opponentColor)) {
+                    return true;
+                }
+            }
         }
     }
+    return false;
+}
+
+function findKing(color) {
+    const kingChar = color === 'white' ? '♔' : '♚';
+    for (let r = 0; r < 8; r++)
+        for (let c = 0; c < 8; c++)
+            if (gameState.board[r][c] === kingChar) return [r, c];
+    return null;
+}
+
+function isCheckmate(color) {
+    // افحص جميع الحركات الممكنة لكل قطعة وإذا الملك يظل في Check => Checkmate
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const piece = gameState.board[r][c];
+            if (piece && isPieceColor(piece, color)) {
+                for (let tr = 0; tr < 8; tr++) {
+                    for (let tc = 0; tc < 8; tc++) {
+                        if (isValidMoveWithoutCheck(r, c, tr, tc, piece, color)) {
+                            // جرب الحركة على نسخة مؤقتة من البورد
+                            const tempBoard = JSON.parse(JSON.stringify(gameState.board));
+                            tempBoard[tr][tc] = piece;
+                            tempBoard[r][c] = '';
+                            const tempState = { ...gameState, board: tempBoard };
+                            if (!isKingInCheckAfterMove(color, tempState)) return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true; // لا توجد أي حركة تمنع Check => Checkmate
+}
+
+function isKingInCheckAfterMove(color, tempState) {
+    const kingPos = findKing(color);
+    const opponentColor = color === 'white' ? 'black' : 'white';
+    for (let r = 0; r < 8; r++)
+        for (let c = 0; c < 8; c++) {
+            const piece = tempState.board[r][c];
+            if (piece && isPieceColor(piece, opponentColor)) {
+                if (isValidMoveWithoutCheck(r, c, kingPos[0], kingPos[1], piece, opponentColor)) return true;
+            }
+        }
+    return false;
+}
+
+function isValidMoveWithoutCheck(fr, fc, tr, tc, piece, color) {
+    // نفس isValidMove لكن بدون فحص Check الملك
+    if (fr === tr && fc === tc) return false;
+    const target = gameState.board[tr][tc];
+    if (target && isPieceColor(target, color)) return false;
+    return true;
+}
+
+
 
     function isPieceColor(piece, color) {
         const white = '♔♕♖♗♘♙';
@@ -762,6 +836,7 @@
 
 </body>
 </html>
+
 
 
 
