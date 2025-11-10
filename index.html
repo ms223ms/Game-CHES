@@ -253,55 +253,69 @@ function checkSubscription(){
     if(!currentUser.subscribed && currentUser.gamesPlayed>=4){ showSubscriptionPanel(); }
 }
 function showSubscriptionPanel(){ document.getElementById('subscriptionPanel').classList.remove('hidden'); document.getElementById('gameArea').classList.add('hidden'); document.getElementById('roomSelection').classList.add('hidden'); }
-async function verifyPayment(){
+async function verifyPayment() {
     const txn = document.getElementById('transactionInput').value.trim();
-    if(!txn){ 
-        alert('يرجى إدخال رقم المعاملة'); 
-        return; 
+    if (!txn) {
+        alert('يرجى إدخال رقم المعاملة');
+        return;
     }
 
-    // تسجيل الدفع في JSONBin مع وضع الحالة "تم التحقق"
+    // تسجيل الدفع في JSONBin
     gameData.paymentVerifications[deviceId] = {
         deviceId,
         email: currentUser.email,
         transaction: txn,
         timestamp: Date.now(),
-        status: 'verified' // ✅ تم التحقق مباشرة
+        status: 'pending'
     };
-
-    // تفعيل الاشتراك للمستخدم
-    currentUser.subscribed = true;
-    currentUser.subscriptionDate = Date.now();
-    gameData.users[deviceId] = currentUser;
-
     await saveData();
-
-    // تنظيف خانة رقم المعاملة
     document.getElementById('transactionInput').value = '';
 
-    alert('✅ تم تفعيل الاشتراك! يمكنك الآن لعب اللعبة.');
+    // تفعيل الاشتراك مؤقتًا حتى يتم المراجعة
+    currentUser.subscribed = true;
+    currentUser.subscriptionDate = Date.now();
+    gameData.users[deviceId].subscribed = true;
+    gameData.users[deviceId].subscriptionDate = currentUser.subscriptionDate;
+    await saveData();
 
-    // إخفاء لوحة الاشتراك وإظهار اللعبة ولوحة اختيار الغرفة
+    // إخفاء رسالة الاشتراك وفتح اللعبة
     document.getElementById('subscriptionPanel').classList.add('hidden');
-    document.getElementById('roomSelection').classList.remove('hidden');
     document.getElementById('gameArea').classList.remove('hidden');
+    document.getElementById('roomSelection').classList.remove('hidden');
 
-    // تحديث عدد الألعاب المتاحة
-    updateGamesDisplay();
+    alert('✅ تم تأكيد الدفع! تم فتح اللعبة لك الآن.');
 }
 
-function updateGamesDisplay(){
+function checkSubscription() {
+    // التحقق من انتهاء الاشتراك
+    if (currentUser.subscribed && currentUser.subscriptionDate) {
+        const now = Date.now(), oneMonth = 30 * 24 * 60 * 60 * 1000;
+        if (now - currentUser.subscriptionDate > oneMonth) {
+            currentUser.subscribed = false;
+            gameData.users[deviceId].subscribed = false;
+            saveData();
+        }
+    }
+
+    // إذا انتهت الألعاب المجانية ولم يشترك
+    if (!currentUser.subscribed && currentUser.gamesPlayed >= 4) {
+        showSubscriptionPanel();
+    }
+}
+
+function updateGamesDisplay() {
     const left = currentUser.subscribed ? '∞' : Math.max(0, 4 - currentUser.gamesPlayed);
     document.getElementById('gamesLeft').textContent = left;
 
     const bar = document.getElementById('statusBar');
-    if(currentUser.subscribed){
+    if (currentUser.subscribed) {
         bar.classList.add('success');
         bar.classList.remove('warning');
-    } else if(currentUser.gamesPlayed >= 3){
+    } else if (currentUser.gamesPlayed >= 3) {
         bar.classList.add('warning');
     }
 }
+
 
 
 // ================== Rooms ==================
@@ -483,4 +497,5 @@ initializeBoard();
 </script>
 </body>
 </html>
+
 
