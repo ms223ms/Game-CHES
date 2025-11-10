@@ -503,79 +503,77 @@
 
     // ============ Rooms ============
     async function joinRoom() {
-        if (!currentUser.subscribed && currentUser.gamesPlayed >= 4) {
-            showSubscriptionPanel();
-            return;
-        }
+    if (!currentUser.subscribed && currentUser.gamesPlayed >= 4) {
+        showSubscriptionPanel();
+        return;
+    }
 
-        let roomId = document.getElementById('roomInput').value.trim().toUpperCase();
-        if (!roomId) {
-            roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
-        }
+    let roomId = document.getElementById('roomInput').value.trim().toUpperCase();
+    if (!roomId) {
+        roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
+    }
 
-        showLoading('جاري الانضمام...');
-        await loadData();
+    showLoading('جاري الانضمام...');
+    await loadData();
 
-        if (!gameData.rooms[roomId]) {
-            // إنشاء غرفة جديدة
-            initializeBoard();
-            gameData.rooms[roomId] = {
-                board: gameState.board,
-                currentTurn: 'white',
-                players: {},
-                createdAt: Date.now()
-            };
-            playerColor = 'white';
+    // إنشاء الغرفة إذا لم تكن موجودة
+    if (!gameData.rooms[roomId]) {
+        initializeBoard();
+        gameData.rooms[roomId] = {
+            board: gameState.board,
+            currentTurn: 'white',
+            players: {},
+            createdAt: Date.now()
+        };
+        playerColor = 'white'; // أول لاعب = أبيض
+    } else {
+        const room = gameData.rooms[roomId];
+        if (!room.players) room.players = {};
+
+        // إذا اللاعب موجود بالفعل، استخدم لونه
+        if (room.players[deviceId]) {
+            playerColor = room.players[deviceId].color;
         } else {
-            const room = gameData.rooms[roomId];
-
-            if (!room.players) room.players = {};
-
-            const count = Object.keys(room.players).length;
-
-            if (count >= 2 && !room.players[deviceId]) {
+            // تحديد لون جديد بناءً على الموجودين
+            const colorsInUse = Object.values(room.players).map(p => p.color);
+            if (!colorsInUse.includes('white')) {
+                playerColor = 'white';
+            } else if (!colorsInUse.includes('black')) {
+                playerColor = 'black';
+            } else {
                 alert('❌ الغرفة ممتلئة!');
                 hideLoading();
                 return;
             }
-
-            // إذا اللاعب موجود مسبقاً في الغرفة، احتفظ بلونه
-           if (room.players[deviceId]) {
-    playerColor = room.players[deviceId].color; // لاعب موجود مسبقًا
-} else {
-    const existingColors = Object.values(room.players).map(p => p.color);
-    if (!existingColors.includes('white')) playerColor = 'white';
-    else if (!existingColors.includes('black')) playerColor = 'black';
-    else {
-        alert('❌ الغرفة ممتلئة!');
-        return;
-    }
-}
-
-            gameState.board = room.board;
-            gameState.currentTurn = room.currentTurn;
         }
 
-        // تسجيل اللاعب في الغرفة
-        gameData.rooms[roomId].players[deviceId] = {
-            email: currentUser.email,
-            color: playerColor,
-            lastSeen: Date.now()
-        };
-
-        currentRoom = roomId;
-        await saveData();
-
-        // تحديث واجهة المستخدم
-        document.getElementById('roomSelection').classList.add('hidden');
-        document.getElementById('gameArea').classList.remove('hidden');
-        document.getElementById('roomCode').textContent = roomId;
-
-        renderBoard();
-        updatePlayersList();
-        hideLoading();
-        startAutoUpdate();
+        // استيراد حالة اللعبة الحالية
+        gameState.board = room.board;
+        gameState.currentTurn = room.currentTurn;
     }
+
+    // تسجيل اللاعب وحفظ بياناته فورًا حتى لا يدخل لاعب آخر بنفس اللون
+    gameData.rooms[roomId].players[deviceId] = {
+        email: currentUser.email,
+        color: playerColor,
+        joinedAt: Date.now(),
+        lastSeen: Date.now()
+    };
+    await saveData();
+
+    currentRoom = roomId;
+
+    // تحديث الواجهة
+    document.getElementById('roomSelection').classList.add('hidden');
+    document.getElementById('gameArea').classList.remove('hidden');
+    document.getElementById('roomCode').textContent = roomId;
+
+    renderBoard();
+    updatePlayersList();
+    hideLoading();
+    startAutoUpdate();
+}
+
 
     async function leaveRoom() {
         if (currentRoom) {
@@ -777,3 +775,4 @@
 
 </body>
 </html>
+
