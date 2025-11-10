@@ -424,7 +424,7 @@
                 deviceId,
                 gamesPlayed: 0,
                 subscribed: false,
-                subscriptionDate: null,
+                subscriptionDate: 0,    // ✅ بدل null
                 createdAt: Date.now()
             };
             gameData.users[deviceId] = currentUser;
@@ -457,10 +457,13 @@
         if (currentUser.subscribed) {
             const now = Date.now();
             const oneMonth = 30 * 24 * 60 * 60 * 1000;
-            if (now - currentUser.subscriptionDate > oneMonth) {
+
+            // ✅ فحص الاشتراك فقط لو التاريخ صالح
+            if (!currentUser.subscriptionDate || (now - currentUser.subscriptionDate > oneMonth) {
                 currentUser.subscribed = false;
                 gameData.users[deviceId].subscribed = false;
                 saveData();
+                showSubscriptionPanel(); // ✅ فتح لوحة الدفع بعد انتهاء الاشتراك
             }
         }
 
@@ -490,6 +493,13 @@
             status: 'pending'
         };
         await saveData();
+
+        // ✅ تحديث بيانات الاشتراك فور الدفع
+    currentUser.subscribed = true;
+    currentUser.subscriptionDate = Date.now();
+    gameData.users[deviceId].subscribed = true;
+    gameData.users[deviceId].subscriptionDate = currentUser.subscriptionDate;
+    await saveData();
 
         alert('✅ تم الإرسال!\nسيتم المراجعة خلال 24 ساعة.');
         document.getElementById('transactionInput').value = '';
@@ -782,6 +792,7 @@
 
 </body>
 </html>
+
 
 
 
