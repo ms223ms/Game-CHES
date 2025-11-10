@@ -254,19 +254,55 @@ function checkSubscription(){
 }
 function showSubscriptionPanel(){ document.getElementById('subscriptionPanel').classList.remove('hidden'); document.getElementById('gameArea').classList.add('hidden'); document.getElementById('roomSelection').classList.add('hidden'); }
 async function verifyPayment(){
-    const txn=document.getElementById('transactionInput').value.trim();
-    if(!txn){ alert('يرجى إدخال رقم المعاملة'); return; }
-    gameData.paymentVerifications[deviceId]={deviceId,email:currentUser.email,transaction:txn,timestamp:Date.now(),status:'pending'};
+    const txn = document.getElementById('transactionInput').value.trim();
+    if(!txn){ 
+        alert('يرجى إدخال رقم المعاملة'); 
+        return; 
+    }
+
+    // تسجيل الدفع في JSONBin مع وضع الحالة "تم التحقق"
+    gameData.paymentVerifications[deviceId] = {
+        deviceId,
+        email: currentUser.email,
+        transaction: txn,
+        timestamp: Date.now(),
+        status: 'verified' // ✅ تم التحقق مباشرة
+    };
+
+    // تفعيل الاشتراك للمستخدم
+    currentUser.subscribed = true;
+    currentUser.subscriptionDate = Date.now();
+    gameData.users[deviceId] = currentUser;
+
     await saveData();
-    alert('✅ تم الإرسال!\nسيتم المراجعة خلال 24 ساعة.'); document.getElementById('transactionInput').value='';
+
+    // تنظيف خانة رقم المعاملة
+    document.getElementById('transactionInput').value = '';
+
+    alert('✅ تم تفعيل الاشتراك! يمكنك الآن لعب اللعبة.');
+
+    // إخفاء لوحة الاشتراك وإظهار اللعبة ولوحة اختيار الغرفة
+    document.getElementById('subscriptionPanel').classList.add('hidden');
+    document.getElementById('roomSelection').classList.remove('hidden');
+    document.getElementById('gameArea').classList.remove('hidden');
+
+    // تحديث عدد الألعاب المتاحة
+    updateGamesDisplay();
 }
+
 function updateGamesDisplay(){
-    const left=currentUser.subscribed?'∞':Math.max(0,4-currentUser.gamesPlayed);
-    document.getElementById('gamesLeft').textContent=left;
-    const bar=document.getElementById('statusBar');
-    if(currentUser.subscribed){ bar.classList.add('success'); bar.classList.remove('warning'); }
-    else if(currentUser.gamesPlayed>=3){ bar.classList.add('warning'); }
+    const left = currentUser.subscribed ? '∞' : Math.max(0, 4 - currentUser.gamesPlayed);
+    document.getElementById('gamesLeft').textContent = left;
+
+    const bar = document.getElementById('statusBar');
+    if(currentUser.subscribed){
+        bar.classList.add('success');
+        bar.classList.remove('warning');
+    } else if(currentUser.gamesPlayed >= 3){
+        bar.classList.add('warning');
+    }
 }
+
 
 // ================== Rooms ==================
 async function joinRoom(){
@@ -447,3 +483,4 @@ initializeBoard();
 </script>
 </body>
 </html>
+
