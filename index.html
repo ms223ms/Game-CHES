@@ -293,7 +293,7 @@
         </div>
     </div>
 
-   <script>
+  <script>
     // ============ إعدادات JSONBin ============
     const JSONBIN_API_KEY = '$2a$10$MUgieOcdv8QNyPRuRsFb6eaAOYcAzxuWL6TB6FbI8L7fhZIVVibdO';
     const JSONBIN_BIN_ID = '6911aa09ae596e708f4fdd18';
@@ -306,13 +306,7 @@
     let playerColor = null;
     let gameData = { users: {}, rooms: {}, paymentVerifications: {} };
     let updateInterval = null;
-
-    let gameState = {
-        board: [],
-        currentTurn: 'white',
-        selectedPiece: null,
-        lastMove: null
-    };
+    let gameState = { board: [], currentTurn: 'white', selectedPiece: null, lastMove: null };
 
     // ============ Device Fingerprint ============
     function generateDeviceFingerprint() {
@@ -376,93 +370,90 @@
     }
 
     async function saveData() {
-  try {
-    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_API_KEY
-      },
-      body: JSON.stringify(gameData)
-    });
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": JSONBIN_API_KEY
+                },
+                body: JSON.stringify(gameData)
+            });
 
-    if (!response.ok) {
-      console.error("❌ خطأ أثناء الحفظ:", response.status, response.statusText);
-      alert("⚠️ لم يتم حفظ البيانات، تحقق من BIN_ID أو ACCESS_KEY");
-    } else {
-      console.log("✅ تم حفظ البيانات بنجاح في JSONBin");
+            if (!response.ok) {
+                console.error("❌ خطأ أثناء الحفظ:", response.status, response.statusText);
+                alert("⚠️ لم يتم حفظ البيانات، تحقق من BIN_ID أو ACCESS_KEY");
+            } else {
+                console.log("✅ تم حفظ البيانات بنجاح في JSONBin");
+            }
+        } catch (error) {
+            console.error("❌ فشل الاتصال بـ JSONBin:", error);
+            alert("🚨 فشل الاتصال بالسيرفر");
+        }
     }
-  } catch (error) {
-    console.error("❌ فشل الاتصال بـ JSONBin:", error);
-    alert("🚨 فشل الاتصال بالسيرفر");
-  }
-}
-
 
     // ============ Authentication ============
-async function login() {
-    const email = document.getElementById('emailInput').value.trim();
-    if (!email || !email.includes('@')) {
-        alert('يرجى إدخال بريد إلكتروني صحيح');
-        return;
-    }
-
-    showLoading('جاري تسجيل الدخول...');
-    await loadData();
-
-    if (gameData.users[deviceId]) {
-        const userData = gameData.users[deviceId];
-        if (userData.email !== email) {
-            alert(`❌ هذا الجهاز مسجل بـ: ${userData.email}\nلا يمكن تغيير الحساب!`);
-            hideLoading();
+    async function login() {
+        const email = document.getElementById('emailInput').value.trim();
+        if (!email || !email.includes('@')) {
+            alert('يرجى إدخال بريد إلكتروني صحيح');
             return;
         }
-        currentUser = userData;
-    } else {
-        currentUser = {
-            email,
-            deviceId,
-            gamesPlayed: 0,
-            subscribed: false,
-            subscriptionDate: null, 
-            createdAt: Date.now()
-        };
-        gameData.users[deviceId] = currentUser;
-        await saveData();
+
+        showLoading('جاري تسجيل الدخول...');
+        await loadData();
+
+        if (gameData.users[deviceId]) {
+            const userData = gameData.users[deviceId];
+            if (userData.email !== email) {
+                alert(`❌ هذا الجهاز مسجل بـ: ${userData.email}\nلا يمكن تغيير الحساب!`);
+                hideLoading();
+                return;
+            }
+            currentUser = userData;
+        } else {
+            currentUser = {
+                email,
+                deviceId,
+                gamesPlayed: 0,
+                subscribed: false,
+                subscriptionDate: null,
+                createdAt: Date.now()
+            };
+            gameData.users[deviceId] = currentUser;
+            await saveData();
+        }
+
+        checkSubscription();
+        showGamePanel();
+        hideLoading();
     }
 
-    // 🚫 إزالة checkSubscription من هنا (ما يتحققش عند الدخول)
-    showGamePanel();
-    hideLoading();
-}
+    function showGamePanel() {
+        document.getElementById('loginPanel').classList.add('hidden');
+        document.getElementById('gamePanel').classList.remove('hidden');
+        document.getElementById('userEmail').textContent = 'المستخدم: ' + currentUser.email;
+        document.getElementById('deviceIdGame').textContent = 'معرف الجهاز: ' + deviceId;
+        updateGamesDisplay();
+    }
 
-function showGamePanel() {
-    document.getElementById('loginPanel').classList.add('hidden');
-    document.getElementById('gamePanel').classList.remove('hidden');
-    document.getElementById('userEmail').textContent = 'المستخدم: ' + currentUser.email;
-    document.getElementById('deviceIdGame').textContent = 'معرف الجهاز: ' + deviceId;
-    updateGamesDisplay();
-}
-
-function logout() {
-    if (currentRoom) leaveRoom();
-    currentUser = null;
-    currentRoom = null;
-    document.getElementById('loginPanel').classList.remove('hidden');
-    document.getElementById('gamePanel').classList.add('hidden');
-}
+    function logout() {
+        if (currentRoom) leaveRoom();
+        currentUser = null;
+        currentRoom = null;
+        document.getElementById('loginPanel').classList.remove('hidden');
+        document.getElementById('gamePanel').classList.add('hidden');
+    }
 
     // ============ Subscription ============
     function checkSubscription() {
         if (currentUser.subscribed && currentUser.subscriptionDate) {
             const now = Date.now();
             const oneMonth = 30 * 24 * 60 * 60 * 1000;
-
-            // ✅ فحص الاشتراك فقط لو التاريخ صالح
             if (now - currentUser.subscriptionDate > oneMonth) {
                 currentUser.subscribed = false;
                 gameData.users[deviceId].subscribed = false;
-                await saveData();
+                saveData();
             }
         }
 
@@ -493,13 +484,6 @@ function logout() {
         };
         await saveData();
 
-        // ✅ تحديث بيانات الاشتراك فور الدفع
-    currentUser.subscribed = true;
-    currentUser.subscriptionDate = Date.now();
-    gameData.users[deviceId].subscribed = true;
-    gameData.users[deviceId].subscriptionDate = currentUser.subscriptionDate;
-    await saveData();
-
         alert('✅ تم الإرسال!\nسيتم المراجعة خلال 24 ساعة.');
         document.getElementById('transactionInput').value = '';
     }
@@ -519,77 +503,63 @@ function logout() {
 
     // ============ Rooms ============
     async function joinRoom() {
-    if (!currentUser.subscribed && currentUser.gamesPlayed >= 4) {
-        showSubscriptionPanel();
-        return;
-    }
-
-    let roomId = document.getElementById('roomInput').value.trim().toUpperCase();
-    if (!roomId) {
-        roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
-    }
-
-    showLoading('جاري الانضمام...');
-    await loadData();
-
-    // إنشاء الغرفة إذا لم تكن موجودة
-    if (!gameData.rooms[roomId]) {
-        initializeBoard();
-        gameData.rooms[roomId] = {
-            board: gameState.board,
-            currentTurn: 'white',
-            players: {},
-            createdAt: Date.now()
-        };
-        playerColor = 'white'; // أول لاعب = أبيض
-    } else {
-        const room = gameData.rooms[roomId];
-        if (!room.players) room.players = {};
-
-        // إذا اللاعب موجود بالفعل، استخدم لونه
-        if (room.players[deviceId]) {
-            playerColor = room.players[deviceId].color;
-        } else {
-            // تحديد لون جديد بناءً على الموجودين
-            const colorsInUse = Object.values(room.players).map(p => p.color);
-            if (!colorsInUse.includes('white')) {
-                playerColor = 'white';
-            } else if (!colorsInUse.includes('black')) {
-                playerColor = 'black';
-            } else {
-                alert('❌ الغرفة ممتلئة!');
-                hideLoading();
-                return;
-            }
+        if (!currentUser.subscribed && currentUser.gamesPlayed >= 4) {
+            showSubscriptionPanel();
+            return;
         }
 
-        // استيراد حالة اللعبة الحالية
-        gameState.board = room.board;
-        gameState.currentTurn = room.currentTurn;
+        let roomId = document.getElementById('roomInput').value.trim().toUpperCase();
+        if (!roomId) {
+            roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        showLoading('جاري الانضمام...');
+        await loadData();
+
+        if (!gameData.rooms[roomId]) {
+            initializeBoard();
+            gameData.rooms[roomId] = {
+                board: gameState.board,
+                currentTurn: 'white',
+                players: {},
+                createdAt: Date.now()
+            };
+            playerColor = 'white';
+        } else {
+            const room = gameData.rooms[roomId];
+            if (!room.players) room.players = {};
+
+            if (room.players[deviceId]) {
+                playerColor = room.players[deviceId].color;
+            } else {
+                const colorsInUse = Object.values(room.players).map(p => p.color);
+                if (!colorsInUse.includes('white')) playerColor = 'white';
+                else if (!colorsInUse.includes('black')) playerColor = 'black';
+                else { alert('❌ الغرفة ممتلئة!'); hideLoading(); return; }
+            }
+
+            gameState.board = room.board;
+            gameState.currentTurn = room.currentTurn;
+        }
+
+        gameData.rooms[roomId].players[deviceId] = {
+            email: currentUser.email,
+            color: playerColor,
+            joinedAt: Date.now(),
+            lastSeen: Date.now()
+        };
+        await saveData();
+
+        currentRoom = roomId;
+        document.getElementById('roomSelection').classList.add('hidden');
+        document.getElementById('gameArea').classList.remove('hidden');
+        document.getElementById('roomCode').textContent = roomId;
+
+        renderBoard();
+        updatePlayersList();
+        hideLoading();
+        startAutoUpdate();
     }
-
-    // تسجيل اللاعب وحفظ بياناته فورًا حتى لا يدخل لاعب آخر بنفس اللون
-    gameData.rooms[roomId].players[deviceId] = {
-        email: currentUser.email,
-        color: playerColor,
-        joinedAt: Date.now(),
-        lastSeen: Date.now()
-    };
-    await saveData();
-
-    currentRoom = roomId;
-
-    // تحديث الواجهة
-    document.getElementById('roomSelection').classList.add('hidden');
-    document.getElementById('gameArea').classList.remove('hidden');
-    document.getElementById('roomCode').textContent = roomId;
-
-    renderBoard();
-    updatePlayersList();
-    hideLoading();
-    startAutoUpdate();
-}
-
 
     async function leaveRoom() {
         if (currentRoom) {
@@ -789,8 +759,10 @@ function logout() {
     });
 </script>
 
+
 </body>
 </html>
+
 
 
 
