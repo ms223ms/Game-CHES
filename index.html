@@ -400,57 +400,57 @@
 
 
     // ============ Authentication ============
-    async function login() {
-        const email = document.getElementById('emailInput').value.trim();
-        if (!email || !email.includes('@')) {
-            alert('يرجى إدخال بريد إلكتروني صحيح');
+async function login() {
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email || !email.includes('@')) {
+        alert('يرجى إدخال بريد إلكتروني صحيح');
+        return;
+    }
+
+    showLoading('جاري تسجيل الدخول...');
+    await loadData();
+
+    if (gameData.users[deviceId]) {
+        const userData = gameData.users[deviceId];
+        if (userData.email !== email) {
+            alert(`❌ هذا الجهاز مسجل بـ: ${userData.email}\nلا يمكن تغيير الحساب!`);
+            hideLoading();
             return;
         }
-
-        showLoading('جاري تسجيل الدخول...');
-        await loadData();
-
-        if (gameData.users[deviceId]) {
-            const userData = gameData.users[deviceId];
-            if (userData.email !== email) {
-                alert(`❌ هذا الجهاز مسجل بـ: ${userData.email}\nلا يمكن تغيير الحساب!`);
-                hideLoading();
-                return;
-            }
-            currentUser = userData;
-        } else {
-            currentUser = {
-                email,
-                deviceId,
-                gamesPlayed: 0,
-                subscribed: false,
-                subscriptionDate: 0,    // ✅ بدل null
-                createdAt: Date.now()
-            };
-            gameData.users[deviceId] = currentUser;
-            await saveData();
-        }
-
-        checkSubscription();
-        showGamePanel();
-        hideLoading();
+        currentUser = userData;
+    } else {
+        currentUser = {
+            email,
+            deviceId,
+            gamesPlayed: 0,
+            subscribed: false,
+            subscriptionDate: 0, // ✅ بدل null
+            createdAt: Date.now()
+        };
+        gameData.users[deviceId] = currentUser;
+        await saveData();
     }
 
-    function showGamePanel() {
-        document.getElementById('loginPanel').classList.add('hidden');
-        document.getElementById('gamePanel').classList.remove('hidden');
-        document.getElementById('userEmail').textContent = 'المستخدم: ' + currentUser.email;
-        document.getElementById('deviceIdGame').textContent = 'معرف الجهاز: ' + deviceId;
-        updateGamesDisplay();
-    }
+    // 🚫 إزالة checkSubscription من هنا (ما يتحققش عند الدخول)
+    showGamePanel();
+    hideLoading();
+}
 
-    function logout() {
-        if (currentRoom) leaveRoom();
-        currentUser = null;
-        currentRoom = null;
-        document.getElementById('loginPanel').classList.remove('hidden');
-        document.getElementById('gamePanel').classList.add('hidden');
-    }
+function showGamePanel() {
+    document.getElementById('loginPanel').classList.add('hidden');
+    document.getElementById('gamePanel').classList.remove('hidden');
+    document.getElementById('userEmail').textContent = 'المستخدم: ' + currentUser.email;
+    document.getElementById('deviceIdGame').textContent = 'معرف الجهاز: ' + deviceId;
+    updateGamesDisplay();
+}
+
+function logout() {
+    if (currentRoom) leaveRoom();
+    currentUser = null;
+    currentRoom = null;
+    document.getElementById('loginPanel').classList.remove('hidden');
+    document.getElementById('gamePanel').classList.add('hidden');
+}
 
     // ============ Subscription ============
     function checkSubscription() {
@@ -792,6 +792,7 @@
 
 </body>
 </html>
+
 
 
 
