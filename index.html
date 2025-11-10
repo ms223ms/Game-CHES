@@ -13,13 +13,14 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+             margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center; /* أفقياً */
+    align-items: center;    /* عمودياً */
+    background: #1a1a1a;
         }
 
         .container {
@@ -58,23 +59,34 @@
 
         #chessboard {
             display: grid;
-  grid-template-columns: repeat(8, 60px);
-  grid-template-rows: repeat(8, 60px);
-  transform: rotateX(60deg) rotateZ(-30deg);
-  perspective: 800px;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    gap: 2px;
+    perspective: 800px; /* لجعل البورد يبدو 3D */
+    transform-style: preserve-3d;
+            width: 90vw;
+    max-width: 480px; /* لا يكبر كثير على الكمبيوتر */
+    height: auto;
+    aspect-ratio: 1 / 1; /* يحافظ على شكل البورد مربع */
         }
 
         .square {
-            width: 60px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 32px;
-  background: linear-gradient(145deg, #f0d9b5, #b58863);
-  box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3);
-  transition: transform 0.2s;
+           display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(6vw); /* حجم القطع يتغير حسب حجم الشاشة */
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4); /* ظل يعطي إحساس بالارتفاع */
+    transform: rotateX(15deg); /* ميل بسيط لجعل البورد مجسم */
         }
+        .light {
+    background: #f0d9b5;
+}
+        .selected {
+    box-shadow: 0 0 15px 3px #ff0 inset;
+}
 
         .square.light {
             background: #f0d9b5;
@@ -83,6 +95,10 @@
         .square.dark {
             background: #b58863;
         }
+        .square div {
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+}
+
 
         .square.selected {
             background: #7fc97f !important;
@@ -159,6 +175,9 @@
             background: #f8f9fa;
             border-radius: 5px;
         }
+        .dark {
+    background: #b58863;
+}
 
         .room-info {
             background: #e3f2fd;
@@ -174,6 +193,25 @@
             color: #1976d2;
             margin: 10px 0;
         }
+        #playersPanel {
+    display: flex;
+    justify-content: space-between;
+    width: 90vw;
+    max-width: 480px;
+    margin-bottom: 10px;
+    perspective: 800px;
+}
+
+.player {
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: #222;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    transform: rotateX(10deg);
+    text-align: center;
+    min-width: 80px;
+}
 
         .players-list {
             display: flex;
@@ -214,6 +252,11 @@
             color: #666;
             font-size: 1.2rem;
         }
+        #gameArea {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
     </style>
 </head>
 <body>
@@ -836,6 +879,7 @@ function isValidMoveWithoutCheck(fr, fc, tr, tc, piece, color) {
 
 </body>
 </html>
+
 
 
 
