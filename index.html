@@ -424,7 +424,7 @@ async function login() {
             deviceId,
             gamesPlayed: 0,
             subscribed: false,
-            subscriptionDate: 0, // ✅ بدل null
+            subscriptionDate: null, 
             createdAt: Date.now()
         };
         gameData.users[deviceId] = currentUser;
@@ -454,16 +454,15 @@ function logout() {
 
     // ============ Subscription ============
     function checkSubscription() {
-        if (currentUser.subscribed) {
+        if (currentUser.subscribed && currentUser.subscriptionDate) {
             const now = Date.now();
             const oneMonth = 30 * 24 * 60 * 60 * 1000;
 
             // ✅ فحص الاشتراك فقط لو التاريخ صالح
-            if (!currentUser.subscriptionDate || (now - currentUser.subscriptionDate > oneMonth) {
+            if (now - currentUser.subscriptionDate > oneMonth) {
                 currentUser.subscribed = false;
                 gameData.users[deviceId].subscribed = false;
-                saveData();
-                showSubscriptionPanel(); // ✅ فتح لوحة الدفع بعد انتهاء الاشتراك
+                await saveData();
             }
         }
 
@@ -792,6 +791,7 @@ function logout() {
 
 </body>
 </html>
+
 
 
 
